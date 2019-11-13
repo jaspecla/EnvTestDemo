@@ -56,8 +56,8 @@ stages:
 - stage: "deploy"
   displayName: "Deploy to Azure Web Apps"
   jobs:
-  - job: "deploy to dev"
-    displayName: "deploy to environments"
+  - deployment: "deploy_dev"
+    displayName: "Deploy to Dev"
     variables:
       appName: "env-test-dev-jaspecla"
     environment: "dev"
