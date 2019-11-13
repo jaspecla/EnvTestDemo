@@ -76,4 +76,4 @@ stages:
               azureSubscription: $(azureSubscription)
               appType: webAppLinux
               appName: $(appName)
-              package: $(Pipeline.Workspace)/**/*.zip
+              package: $(Pipeline.Workspace)/EnvTestDemo/*.zip
