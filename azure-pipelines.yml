@@ -1,34 +1,46 @@
-# ASP.NET
-# Build and test ASP.NET projects.
-# Add steps that publish symbols, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
+# ASP.NET Core
+# Build and test ASP.NET Core projects targeting .NET Core.
+# Add steps that run tests, create a NuGet package, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
 
 trigger:
 - master
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: 'ubuntu-latest'
 
 variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
+  projectDir: "$(System.DefaultWorkingDirectory)/EnvTestDemo/"
+  projectFile: "$(projectDir)/EnvTestDemo.csproj"
 
 steps:
-- task: NuGetToolInstaller@1
-
-- task: NuGetCommand@2
+- task: DotNetCoreCLI@2
+  displayName: "dotnet build"
   inputs:
-    restoreSolution: '$(solution)'
-
-- task: VSBuild@1
+    command: build
+    projects: $(projectFile)
+    arguments: '--configuration $(buildConfiguration)'
+   
+- task: DotNetCoreCLI@2
+  displayName: "dotnet publish"
   inputs:
-    solution: '$(solution)'
-    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    command: publish
+    projects: $(projectFile)
+    arguments: --configuration $(buildConfiguration) --output publish_output
+    zipAfterPublish: false
+    publishWebProjects: false
+    modifyOutputPath: true
 
-- task: VSTest@2
+- task: ArchiveFiles@2
+  displayName: "Archive files"
   inputs:
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    rootFolderOrFile: "$(System.DefaultWorkingDirectory)/EnvTestDemo/publish_output/EnvTestDemo/"
+    includeRootFolder: false
+    archiveFile: "$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip"
+
+- task: PublishPipelineArtifact@1
+  displayName: "publish artifact"
+  inputs:
+    path: "$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip"
+    artifact: EnvTestDemo
