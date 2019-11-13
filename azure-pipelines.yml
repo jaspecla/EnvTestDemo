@@ -53,11 +53,11 @@ stages:
         path: "$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip"
         artifact: EnvTestDemo
 
-- stage: "deploy"
-  displayName: "Deploy to Azure Web Apps"
+- stage: "deploy_dev"
+  displayName: "Deploy to Dev"
   jobs:
-  - deployment: "deploy_dev"
-    displayName: "Deploy to Dev"
+  - deployment: "deploy_dev_web_app"
+    displayName: "Deploy to Dev Web App"
     variables:
       appName: "env-test-dev-jaspecla"
     environment: "dev"
@@ -71,16 +71,18 @@ stages:
               artifact: EnvTestDemo
 
           - task: AzureWebApp@1
-            displayName: 'Deploy to Dev'
+            displayName: 'Deploy to Dev Azure Web App'
             inputs:
               azureSubscription: $(azureSubscription)
               appType: webAppLinux
               appName: $(appName)
               package: $(Pipeline.Workspace)/EnvTestDemo/*.zip
 
-  - deployment: "deploy_prod"
-    dependsOn: "deploy_dev"
-    displayName: "Deploy to Production"
+- stage: "deploy_prod"
+  displayName: "Deploy to Prod"
+  jobs:
+  - deployment: "deploy_prod_web_app"
+    displayName: "Deploy to Production Web App"
     variables:
       appName: "env-test-prod-jaspecla"
     environment: "prod"
@@ -94,7 +96,7 @@ stages:
               artifact: EnvTestDemo
 
           - task: AzureWebApp@1
-            displayName: 'Deploy to Dev'
+            displayName: 'Deploy to Prod Azure Web App'
             inputs:
               azureSubscription: $(azureSubscription)
               appType: webAppLinux
