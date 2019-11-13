@@ -77,3 +77,25 @@ stages:
               appType: webAppLinux
               appName: $(appName)
               package: $(Pipeline.Workspace)/EnvTestDemo/*.zip
+
+  - deployment: "deploy_prod"
+    displayName: "Deploy to Production"
+    variables:
+      appName: "env-test-prod-jaspecla"
+    environment: "prod"
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadPipelineArtifact@2
+            displayName: "Download Artifact from Build Stage"
+            inputs:
+              artifact: EnvTestDemo
+
+          - task: AzureWebApp@1
+            displayName: 'Deploy to Dev'
+            inputs:
+              azureSubscription: $(azureSubscription)
+              appType: webAppLinux
+              appName: $(appName)
+              package: $(Pipeline.Workspace)/EnvTestDemo/*.zip
