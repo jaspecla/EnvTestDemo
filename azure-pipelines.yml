@@ -79,6 +79,7 @@ stages:
               package: $(Pipeline.Workspace)/EnvTestDemo/*.zip
 
   - deployment: "deploy_prod"
+    dependsOn: "deploy_dev"
     displayName: "Deploy to Production"
     variables:
       appName: "env-test-prod-jaspecla"
